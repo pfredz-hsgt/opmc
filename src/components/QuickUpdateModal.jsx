@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Popup, Picker, Button, Toast } from 'antd-mobile'
+import { Popup, Dropdown, Button, Toast } from 'antd-mobile'
 import { supabase } from '../supabaseClient'
 import './QuickUpdateModal.css'
 
@@ -18,12 +18,7 @@ const QuickUpdateModal = ({ visible, medicine, onClose, onUpdate }) => {
         petak: null
     })
 
-    const [pickerVisible, setPickerVisible] = useState({
-        baris: false,
-        rak: false,
-        tingkat: false,
-        petak: false
-    })
+    const [activeKey, setActiveKey] = useState(null)
 
     // Fetch location options from Supabase
     useEffect(() => {
@@ -62,6 +57,7 @@ const QuickUpdateModal = ({ visible, medicine, onClose, onUpdate }) => {
             setLocationOptions(grouped)
         }
 
+        setActiveKey(null)
         if (visible) {
             fetchLocationOptions()
         }
@@ -112,20 +108,7 @@ const QuickUpdateModal = ({ visible, medicine, onClose, onUpdate }) => {
         }
     }
 
-    const openPicker = (category) => {
-        setPickerVisible({ ...pickerVisible, [category]: true })
-    }
-
-    const handlePickerConfirm = (category, value) => {
-        setSelectedLocation({ ...selectedLocation, [category]: value[0] })
-        setPickerVisible({ ...pickerVisible, [category]: false })
-    }
-
     if (!medicine) return null
-
-    const getDisplayValue = (category) => {
-        return selectedLocation[category] || 'Select'
-    }
 
     const hasCompleteLocation =
         selectedLocation.baris &&
@@ -152,61 +135,40 @@ const QuickUpdateModal = ({ visible, medicine, onClose, onUpdate }) => {
                     </div>
 
                     <div className="location-selectors">
-                        {/* Baris Selector */}
-                        <div className="selector-item">
-                            <label>Baris (Row)</label>
-                            <div
-                                className="selector-button"
-                                onClick={() => openPicker('baris')}
-                            >
-                                <span className={selectedLocation.baris ? 'selected' : 'placeholder'}>
-                                    {getDisplayValue('baris')}
-                                </span>
-                                <span className="arrow">›</span>
-                            </div>
-                        </div>
-
-                        {/* Rak Selector */}
-                        <div className="selector-item">
-                            <label>Rak (Shelf)</label>
-                            <div
-                                className="selector-button"
-                                onClick={() => openPicker('rak')}
-                            >
-                                <span className={selectedLocation.rak ? 'selected' : 'placeholder'}>
-                                    {getDisplayValue('rak')}
-                                </span>
-                                <span className="arrow">›</span>
-                            </div>
-                        </div>
-
-                        {/* Tingkat Selector */}
-                        <div className="selector-item">
-                            <label>Tingkat (Level)</label>
-                            <div
-                                className="selector-button"
-                                onClick={() => openPicker('tingkat')}
-                            >
-                                <span className={selectedLocation.tingkat ? 'selected' : 'placeholder'}>
-                                    {getDisplayValue('tingkat')}
-                                </span>
-                                <span className="arrow">›</span>
-                            </div>
-                        </div>
-
-                        {/* Petak Selector */}
-                        <div className="selector-item">
-                            <label>Petak (Compartment)</label>
-                            <div
-                                className="selector-button"
-                                onClick={() => openPicker('petak')}
-                            >
-                                <span className={selectedLocation.petak ? 'selected' : 'placeholder'}>
-                                    {getDisplayValue('petak')}
-                                </span>
-                                <span className="arrow">›</span>
-                            </div>
-                        </div>
+                        <Dropdown activeKey={activeKey} onChange={setActiveKey}>
+                            {['baris', 'rak', 'tingkat', 'petak'].map(category => (
+                                <Dropdown.Item
+                                    key={category}
+                                    title={selectedLocation[category] || category.charAt(0).toUpperCase() + category.slice(1)}
+                                >
+                                    <div style={{ padding: 12, maxHeight: '40vh', overflowY: 'auto' }}>
+                                        {locationOptions[category].map(option => (
+                                            <div
+                                                key={option.value}
+                                                onClick={() => {
+                                                    setSelectedLocation(prev => ({ ...prev, [category]: option.value }))
+                                                    setActiveKey(null)
+                                                }}
+                                                style={{
+                                                    padding: '12px',
+                                                    borderBottom: '1px solid #f5f5f5',
+                                                    color: selectedLocation[category] === option.value ? 'var(--adm-color-primary)' : 'inherit',
+                                                    fontWeight: selectedLocation[category] === option.value ? 'bold' : 'normal',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                {option.label}
+                                            </div>
+                                        ))}
+                                        {locationOptions[category].length === 0 && (
+                                            <div style={{ padding: '12px', textAlign: 'center', color: '#999' }}>
+                                                No options available
+                                            </div>
+                                        )}
+                                    </div>
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown>
                     </div>
 
                     {hasCompleteLocation && (
@@ -239,18 +201,6 @@ const QuickUpdateModal = ({ visible, medicine, onClose, onUpdate }) => {
                     </div>
                 </div>
             </Popup>
-
-            {/* Pickers for each category */}
-            {Object.keys(locationOptions).map(category => (
-                <Picker
-                    key={category}
-                    columns={[locationOptions[category]]}
-                    visible={pickerVisible[category]}
-                    onClose={() => setPickerVisible({ ...pickerVisible, [category]: false })}
-                    onConfirm={(value) => handlePickerConfirm(category, value)}
-                    value={selectedLocation[category] ? [selectedLocation[category]] : []}
-                />
-            ))}
         </>
     )
 }

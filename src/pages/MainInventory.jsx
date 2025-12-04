@@ -112,9 +112,11 @@ const MainInventory = ({ onNavigateToSettings }) => {
             <div className="search-container">
                 <SearchBar
                     placeholder="Search medicines..."
+                    title="Search"
                     value={searchText}
                     onChange={setSearchText}
                     showCancelButton
+                    cancelText="Clear"
                     onClear={() => setSearchText('')}
                 />
             </div>
