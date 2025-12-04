@@ -248,6 +248,9 @@ const QuickUpdateModal = ({ visible, medicine, onClose, onUpdate }) => {
                     visible={pickerVisible[category]}
                     onClose={() => setPickerVisible({ ...pickerVisible, [category]: false })}
                     onConfirm={(value) => handlePickerConfirm(category, value)}
+                    cancelText="Cancel"
+                    confirmText="Confirm"
+                    title="Select Location"
                     value={selectedLocation[category] ? [selectedLocation[category]] : []}
                 />
             ))}
