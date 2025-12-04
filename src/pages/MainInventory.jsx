@@ -106,7 +106,7 @@ const MainInventory = ({ onNavigateToSettings }) => {
                     />
                 }
             >
-                OPMC Inventory
+                OPD Master Catalog
             </NavBar>
 
             <div className="search-container">

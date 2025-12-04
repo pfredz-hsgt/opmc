@@ -214,7 +214,6 @@ const Settings = ({ onNavigateBack }) => {
         <div className="settings-page">
             <NavBar
                 className="settings-navbar"
-                back={<LeftOutline />}
                 onBack={onNavigateBack}
             >
                 Settings
